@@ -1,0 +1,36 @@
+This is a very simple database to enable fast, local queries of the
+haveibeenpwned.com list of compromised passwords, or other similar
+datasets consisting of hexadecimal SHA-1 hashes of arbitrary strings.
+The database is stored as a simple Bloom filter using a 256 MiB
+memory-mapped array and three separate prime hashes.  We use the
+OpenSSL bignum library because it was convenient, but for historical
+reasons the checker program depends on FreeBSD's libmd to actually
+compute the hashes.  (This should be fixed to use the OpenSSL SHA-1
+routines instead since we already have to link against that.)
+
+The following programs are provided:
+
+makepassdb
+	Creates the database.  Takes a single argument, the name of a
+	file containing the list of hashes, which must end in ".txt".
+	The database will be written in the same directory in a file
+	ending in ".set".  The program reports every 100,000 hashes
+	read.
+
+passdbstat
+	Reports the total number of bits set in the Bloom filter,
+	as an absolute number and a percentage of the total database
+	size.  If the filter is too highly occupied, the number of
+	false positives will increase dramatically, and the database
+	size (DB_SIZE in passdb.h) should be increased.
+
+checkpass
+	Checks a password or passwords in the database by computing
+	the SHA-1 hash and then checking the Bloom filter.  The
+	utility does not verify that the hash is actually in the
+	original list; to avoid false positives it is still necessary
+	to scan the list.  The first argument is the name of the
+	database (the .set file constructed by makepassdb); the second
+	and subsequent arguments are passwords to check.  If no
+	passwords are provided on the command line, checkpass will
+	prompt for a password using getpass(3).
