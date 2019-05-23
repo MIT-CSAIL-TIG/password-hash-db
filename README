@@ -1,8 +1,8 @@
 This is a very simple database to enable fast, local queries of the
 haveibeenpwned.com list of compromised passwords, or other similar
 datasets consisting of hexadecimal SHA-1 hashes of arbitrary strings.
-The database is stored as a simple Bloom filter using a 512 MiB
-memory-mapped array and six separate prime cofactors to distribute the
+The database is stored as a simple Bloom filter using a ~630 MiB
+memory-mapped array and seven separate prime cofactors to distribute the
 hashes.  We use the OpenSSL bignum library because it was convenient,
 but for historical reasons the checker program depends on FreeBSD's
 libmd to actually compute the hashes.  (This should be fixed to use
