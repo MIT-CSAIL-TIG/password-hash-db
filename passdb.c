@@ -55,6 +55,8 @@ init_passdb(unsigned char **bufp, const char *dbname, int mode)
 		return -1;
 	}
 	close(fd);
+	if (mode & O_CREAT)
+		mlock(buf, DB_SIZE);
 	*bufp = buf;
 	return 0;
 }
