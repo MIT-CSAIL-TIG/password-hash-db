@@ -1,6 +1,6 @@
 PROGS=	makepassdb passdbstat checkpass
 SRCS=	passdb.c makepassdb.c passdbstat.c checkpass.c
-CFLAGS=	-O -Wall -march=native
+CFLAGS=	-O3 -Wall -march=native
 LIBS=	-lssl -lcrypto	# we use OpenSSL's bignum library
 
 all: $(PROGS)

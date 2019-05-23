@@ -9,12 +9,13 @@
 
 #define	HASHLEN 20		/* it's a 20-byte SHA-1 hash */
 
-#define DB_SIZE (size_t)268435456	   /* 16 MB database */
-#define	DB_BITS (DB_SIZE*CHAR_BIT)	 /* number of bits in the database */
+#define DB_SIZE ((size_t)536870914) /* 512 MB database */
+#define	DB_BITS ((size_t)4294967311) /* number of bits in the database */
 
-#define PRIME_VALS \
-	{ 137438953447ul, 9141833383481485409ul, 4530053345826294137ul }
-#define	NPRIMES	3
+#define COFACTOR_VALS \
+	{ 1ul, 137438953447ul, 9141833383481485409ul, 4530053345826294137ul, \
+	  16971466431813870143ul, 9127894694217334319ul }
+#define	NCOFACTORS	6
 
 extern int init_passdb(unsigned char **, const char *, int mode);
 extern void mark_passdb(unsigned char *, const char *);

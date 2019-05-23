@@ -12,9 +12,16 @@
 
 #include "passdb.h"
 
+/*
+ * The "hash" functions are constructed by multiplying the input value
+ * (which by construction is uniform over 160 bits) by a single cofactor
+ * modulo the actual size of the table.  For the table occupancy we are
+ * expecting, 6 "hash functions" are required to get a reasonable false-
+ * positive rate.
+ */
 static BN_CTX *ctx;
-static BN_ULONG prime_vals[] = PRIME_VALS;
-static BIGNUM primes[NPRIMES], modulus;
+static BN_ULONG cofactor_vals[] = COFACTOR_VALS;
+static BIGNUM cofactors[NCOFACTORS], modulus;
 
 int
 init_passdb(unsigned char **bufp, const char *dbname, int mode)
@@ -23,9 +30,9 @@ init_passdb(unsigned char **bufp, const char *dbname, int mode)
 	unsigned char *buf;
 
 	ctx = BN_CTX_new();
-	for (int i = 0; i < NPRIMES; i++) {
-		BN_init(&primes[i]);
-		BN_set_word(&primes[i], prime_vals[i]);
+	for (int i = 0; i < NCOFACTORS; i++) {
+		BN_init(&cofactors[i]);
+		BN_set_word(&cofactors[i], cofactor_vals[i]);
 	}
 	BN_init(&modulus);
 	BN_set_word(&modulus, DB_BITS);
@@ -33,7 +40,7 @@ init_passdb(unsigned char **bufp, const char *dbname, int mode)
 	fd = open(dbname, mode, 0666);
 	if (fd == -1)
 		return -1;
-	if (fd & O_CREAT) {
+	if (mode & O_CREAT) {
 		if (ftruncate(fd, DB_SIZE) == -1)
 			return -1;
 	}
@@ -69,9 +76,9 @@ mark_passdb(unsigned char *db, const char *hexdigest)
 		return;
 	}
 
-	for (i = 0; i < NPRIMES; i++) {
+	for (i = 0; i < NCOFACTORS; i++) {
 		BN_init(&temp);
-		BN_mod_mul(&temp, number, &primes[i], &modulus, ctx);
+		BN_mod_mul(&temp, number, &cofactors[i], &modulus, ctx);
 		val = BN_get_word(&temp);
 		BN_free(&temp);
 		assert(val < DB_BITS);
@@ -95,9 +102,9 @@ check_passdb(unsigned char *db, const char *hexdigest)
 		return (0);
 	}
 
-	for (i = 0, ispresent = 1; i < NPRIMES; i++) {
+	for (i = 0, ispresent = 1; i < NCOFACTORS; i++) {
 		BN_init(&temp);
-		BN_mod_mul(&temp, number, &primes[i], &modulus, ctx);
+		BN_mod_mul(&temp, number, &cofactors[i], &modulus, ctx);
 		val = BN_get_word(&temp);
 		BN_free(&temp);
 		assert(val < DB_BITS);
@@ -117,8 +124,8 @@ sync_passdb(unsigned char *buf)
 void close_passdb(unsigned char *buf)
 {
 	munmap(buf, DB_SIZE);
-	for (int i = 0; i < NPRIMES; i++) {
-		BN_free(&primes[i]);
+	for (int i = 0; i < NCOFACTORS; i++) {
+		BN_free(&cofactors[i]);
 	}
 	BN_free(&modulus);
 	BN_CTX_free(ctx);
