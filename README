@@ -24,6 +24,10 @@ passdbstat
 	false positives will increase dramatically, and the database
 	size (DB_SIZE in passdb.h) should be increased.
 
+	As written, this program depends on the _popcnt64 intrinsic
+	from <x86intrin.h> and will only compile or run on amd64
+	CPUs which implement the relevant instruction.
+
 checkpass
 	Checks a password or passwords in the database by computing
 	the SHA-1 hash and then checking the Bloom filter.  The
