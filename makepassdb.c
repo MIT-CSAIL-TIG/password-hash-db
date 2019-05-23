@@ -46,7 +46,7 @@ main(int argc, char *const *argv)
 	while ((bufline = fgetln(fp, &len)) != NULL) {
 		++lineno;
 		if (lineno % 100000 == 0) {
-			sync_passdb(db_p);
+			/* sync_passdb(db_p); */
 			printf("%lu\r", lineno);
 			fflush(stdout);
 		}
